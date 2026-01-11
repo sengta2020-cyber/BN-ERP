@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="lo">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BN Enterprise ERP 2026</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0F2C59;
+            --secondary: #3B82F6;
+            --bg: #EFF6FF;
+        }
+
+        body {
+            font-family: 'Noto Sans Lao', 'Sarabun', sans-serif;
+            background: var(--bg);
+            display: flex;
+            color: #334155;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            height: 100%;
+            background: white;
+            border-right: 1px solid #E2E8F0;
+            z-index: 100;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item {
+            padding: 12px 25px;
+            color: #64748B;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: #DBEAFE;
+            color: var(--secondary);
+            border-right: 4px solid var(--secondary);
+        }
+
+        .section-label {
+            font-size: 11px;
+            color: #94A3B8;
+            padding: 20px 25px 5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .main {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .card-custom {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .section-pane {
+            display: none;
+            height: 100%;
+            animation: fadeIn 0.3s;
+        }
+
+        .section-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Upload Styles */
+        .upload-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .upload-box {
+            width: 140px;
+            height: 140px;
+            border-radius: 24px;
+            background: #F8FAFC;
+            border: 2px dashed #CBD5E1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .upload-box:hover {
+            border-color: var(--secondary);
+            background: #EFF6FF;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(59, 130, 246, 0.15);
+        }
+
+        .upload-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .upload-placeholder {
+            text-align: center;
+            color: #94A3B8;
+            transition: 0.3s;
+        }
+
+        .upload-box:hover .upload-placeholder {
+            color: var(--secondary);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-badge {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: 0.2s;
+        }
+
+        .upload-box:hover+.upload-badge {
+            transform: scale(1.1);
+            background: var(--secondary);
+        }
+
+        /* Loading Overlay */
+        #globalLoading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* POS & Print Styles */
+        .product-card {
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #eee;
+        }
+
+        .product-card:hover {
+            border-color: var(--secondary);
+        }
+
+        @media print {
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .sidebar,
+            .login-overlay,
+            .modal,
+            .btn,
+            .upload-badge {
+                display: none !important;
+            }
+
+            .main {
+                padding: 0 !important;
+            }
+
+            .card-custom {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            #assets::before {
+                content: "Asset Report";
+                font-size: 24px;
+                font-weight: bold;
+                display: block;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Login Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .login-enter {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- GLOBAL LOADING -->
+    <div id="globalLoading" class="d-none">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <div class="mt-2 fw-bold text-primary">Syncing with Cloud...</div>
+    </div>
+
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay"
+        class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex justify-content-center align-items-center"
+        style="z-index: 2000; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1;">
+        <div id="loginCard" class="login-container p-5 bg-white shadow-lg text-center border-0 login-enter"
+            style="max-width: 400px; width: 90%; border-radius: 24px; transition: transform 0.3s;">
+            <div class="mb-4">
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                    <i class="fas fa-cube fa-3x text-primary"></i>
+                </div>
+                <h3 class="fw-bold text-dark m-0">BN Enterprise</h3>
+                <p class="text-muted small">ລະບົບຄຸ້ມຄອງທຸລະກິດ 2026</p>
+            </div>
+            <div class="form-floating mb-3 text-start">
+                <input type="text" class="form-control border-light bg-light" id="loginUser" placeholder="Username"
+                    onkeyup="if(event.key==='Enter') attemptLogin()">
+                <label><i class="fas fa-user me-2 text-muted"></i>ຊື່ຜູ້ໃຊ້ (Username)</label>
+            </div>
+            <div class="form-floating mb-3 text-start">
+                <input type="password" class="form-control border-light bg-light" id="loginPass" placeholder="Password"
+                    onkeyup="if(event.key==='Enter') attemptLogin()">
+                <label><i class="fas fa-lock me-2 text-muted"></i>ລະຫັດຜ່ານ (Password)</label>
+            </div>
+            <button id="loginBtn" class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-4"
+                onclick="attemptLogin()">
+                <span id="loginBtnText">ເຂົ້າສູ່ລະບົບ (Login)</span>
+                <div id="loginLoading" class="spinner-border spinner-border-sm text-white d-none"></div>
+            </button>
+            <p id="loginError" class="text-danger small mt-3 fw-bold" style="display: none;"></p>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header text-center">
+            <div class="mb-2">
+                <div class="bg-white text-primary rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm"
+                    style="width: 50px; height: 50px;">
+                    <i class="fas fa-cube fa-lg"></i>
+                </div>
+            </div>
+            <h5 class="m-0 fw-bold">BN ERP 2026</h5>
+            <small style="opacity: 0.8; font-size: 0.75rem;">Enterprise Edition</small>
+            <div
+                class="mt-4 p-3 bg-white bg-opacity-10 rounded text-start d-flex align-items-center border border-white border-opacity-25">
+                <i class="fas fa-user-circle fa-2x me-3"></i>
+                <div class="lh-sm">
+                    <div class="fw-bold small" id="userDisplay">Guest</div>
+                    <small style="font-size: 0.7rem; opacity: 0.8;" id="roleDisplay">Please Login</small>
+                </div>
+            </div>
+        </div>
+        <div class="section-label">Operations</div>
+        <div class="nav-item active" onclick="nav('dashboard', this)"><i
+                class="fas fa-tachometer-alt me-2"></i>Dashboard</div>
+        <div class="nav-item" onclick="nav('sales', this)"><i class="fas fa-cash-register me-2"></i> POS Terminal</div>
+        <div class="nav-item" onclick="nav('assets', this)"><i class="fas fa-boxes me-2"></i> Asset Governance</div>
+        <div class="nav-item" onclick="nav('manual', this)"><i class="fas fa-book me-2"></i> ຄູ່ມືການນຳໃຊ້</div>
+        <div class="mt-auto p-3">
+            <button class="btn btn-danger w-100 btn-sm" onclick="logout()"><i
+                    class="fas fa-sign-out-alt me-2"></i>Logout</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="section-pane active">
+            <h3 class="mb-4 fw-bold text-dark">Executive Overview</h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card-custom p-4 h-100" onclick="nav('sales', document.querySelectorAll('.nav-item')[1])"
+                        style="cursor: pointer; border-left: 5px solid #3B82F6;">
+                        <h5 class="fw-bold"><i class="fas fa-cash-register text-primary me-2"></i>POS Terminal</h5>
+                        <h3 class="fw-bold text-primary mt-3" id="dashRev">฿0.00</h3>
+                        <small class="text-success">Today's Sales</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom p-4 h-100"
+                        onclick="nav('assets', document.querySelectorAll('.nav-item')[2])"
+                        style="cursor: pointer; border-left: 5px solid #10B981;">
+                        <h5 class="fw-bold"><i class="fas fa-boxes text-success me-2"></i>Asset Governance</h5>
+                        <h3 class="fw-bold text-success mt-3" id="dashAssetCount">0 Items</h3>
+                        <small class="text-muted">Total Registered</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POS TERMINAL -->
+        <div id="sales" class="section-pane">
+            <div class="row h-100">
+                <div class="col-8 h-100">
+                    <input type="text" class="form-control mb-3" placeholder="Search Products..."
+                        onkeyup="filterPos(this.value)">
+                    <div class="row g-3" id="posGrid"></div>
+                </div>
+                <div class="col-4 h-100 d-flex flex-column">
+                    <div class="card-custom p-3 flex-grow-1 d-flex flex-column">
+                        <h5 class="fw-bold"><i class="fas fa-shopping-cart me-2"></i>Current Order</h5>
+                        <div id="cartItems" class="flex-grow-1 overflow-auto my-3"></div>
+                        <div class="border-top pt-3">
+                            <div class="d-flex justify-content-between h4 fw-bold"><span>Total:</span><span
+                                    class="text-primary" id="cartTotal">0.00</span></div>
+                            <button class="btn btn-primary w-100 py-3 mt-2 fw-bold"
+                                onclick="checkout()">CHECKOUT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- USER MANUAL -->
+        </div>
+        <div id="manual" class="section-pane">
+            <h3 class="mb-4 fw-bold text-primary"><i class="fas fa-book me-2"></i>ຄູ່ມືການນຳໃຊ້ (User Manual)</h3>
+            <div class="accordion shadow-sm" id="accordionManual">
+                <!-- 1. Login -->
+                <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button fw-bold bg-white" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#man1">
+                            <span class="badge bg-primary me-2">1</span> ການເຂົ້າສູ່ລະບົບ (Login)
+                        </button>
+                    </h2>
+                    <div id="man1" class="accordion-collapse collapse show" data-bs-parent="#accordionManual">
+                        <div class="accordion-body bg-light">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ໃສ່
+                                    <strong>ຊື່ຜູ້ໃຊ້ (Username)</strong> ແລະ <strong>ລະຫັດຜ່ານ (Password)</strong>.
+                                </li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ກົດປຸ່ມ
+                                    <strong>"ເຂົ້າສູ່ລະບົບ (Login)"</strong>.
+                                </li>
+                                <li class="mb-2"><i class="fas fa-info-circle text-info me-2"></i><em>Default
+                                        Account: admin / admin</em></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Dashboard -->
+                <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold bg-white" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#man2">
+                            <span class="badge bg-primary me-2">2</span> ໜ້າ Dashboard (ພາບລວມ)
+                        </button>
+                    </h2>
+                    <div id="man2" class="accordion-collapse collapse" data-bs-parent="#accordionManual">
+                        <div class="accordion-body bg-light">
+                            <p>ໜ້ານີ້ສະແດງພາບລວມຂອງລະບົບ:</p>
+                            <ul>
+                                <li><strong>POS Terminal:</strong> ສະແດງຍອດຂາຍລວມຂອງມື້ນີ້.</li>
+                                <li><strong>Asset Governance:</strong> ສະແດງຈຳນວນຊັບສິນທັງໝົດທີ່ໄດ້ລົງທະບຽນໄວ້.</li>
+                                <li>ສາມາດກົດທີ່ກ່ອງ (Card) ເພື່ອເຂົ້າໄປຍັງໜ້າການເຮັດວຽກນັ້ນໆໄດ້ທັນທີ.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. POS -->
+                <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold bg-white" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#man3">
+                            <span class="badge bg-primary me-2">3</span> ການຂາຍ POS (Point of Sale)
+                        </button>
+                    </h2>
+                    <div id="man3" class="accordion-collapse collapse" data-bs-parent="#accordionManual">
+                        <div class="accordion-body bg-light">
+                            <ol>
+                                <li class="mb-2"><strong>ຄົ້ນຫາສິນຄ້າ:</strong> ພິມຊື່ສິນຄ້າໃນຊ່ອງຄົ້ນຫາດ້ານເທິງ.
+                                </li>
+                                <li class="mb-2"><strong>ເລືອກສິນຄ້າ:</strong> ກົດທີ່ກ່ອງສິນຄ້າ
+                                    ເພື່ອເພີ່ມລົງໃນລາຍການສັ່ງຊື້ (ຂວາມື).</li>
+                                <li class="mb-2"><strong>ຊຳລະເງິນ:</strong> ກົດປຸ່ມ <strong>"CHECKOUT"</strong>
+                                    ເມື່ອລູກຄ້າຊຳລະເງິນຮຽບຮ້ອຍແລ້ວ.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Assets -->
+                <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold bg-white" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#man4">
+                            <span class="badge bg-primary me-2">4</span> ການຈັດການຊັບສິນ (Asset Governance)
+                        </button>
+                    </h2>
+                    <div id="man4" class="accordion-collapse collapse" data-bs-parent="#accordionManual">
+                        <div class="accordion-body bg-light">
+                            <ul>
+                                <li class="mb-2"><strong>ການເພີ່ມຊັບສິນໃໝ່:</strong> ກົດປຸ່ມ <span
+                                        class="badge bg-primary"><i class="fas fa-plus"></i> New Asset</span>
+                                    ແລ້ວຕື່ມຂໍ້ມູນ, ອັບໂຫຼດຮູບພາບ ແລະ ກົດ Save Asset.</li>
+                                <li class="mb-2"><strong>ການແກ້ໄຂ:</strong> ກົດປຸ່ມ <span
+                                        class="badge bg-light text-dark border"><i
+                                            class="fas fa-wrench text-warning"></i></span>
+                                    ຫຼັງລາຍການທີ່ຕ້ອງການແກ້ໄຂ.</li>
+                                <li class="mb-2"><strong>ການລົບ:</strong> ກົດປຸ່ມ <span
+                                        class="badge bg-light text-dark border"><i
+                                            class="fas fa-trash text-danger"></i></span> (ສະເພາະ Admin ເທົ່ານັ້ນ).
+                                </li>
+                                <li class="mb-2"><strong>ການຄົ້ນຫາ:</strong> ພິມລະຫັດ, ຊື່, ຫຼື ສະຖານະ ໃນຊ່ອງ Search
+                                    ເພື່ອຄົ້ນຫາທັນທີ.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASSET GOVERNANCE -->
+        <div id="assets" class="section-pane">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold text-primary"><i class="fas fa-boxes me-2"></i>ລະບົບຄຸ້ມຄອງຊັບສິນ</h3>
+                <div>
+                    <button class="btn btn-outline-info me-2 fw-bold" onclick="printReport()"><i
+                            class="fas fa-print me-2"></i>Report</button>
+                    <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addAssetModal"><i
+                            class="fas fa-plus me-2"></i>New Asset</button>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-info"><small
+                            class="text-muted fw-bold">ມູນຄ່າລວມ</small>
+                        <h4 class="mb-0 text-info fw-bold" id="assetTotalVal">0</h4>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-success"><small
+                            class="text-muted fw-bold">ໃຊ້ງານຢູ່</small>
+                        <h4 class="mb-0 text-success fw-bold" id="assetActiveCount">0</h4>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-warning"><small
+                            class="text-muted fw-bold">ສົ່ງຊ້ອມ</small>
+                        <h4 class="mb-0 text-warning fw-bold" id="assetRepairCount">0</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom p-0 overflow-hidden shadow-sm">
+                <div class="p-3 bg-light border-bottom">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-4">
+                            <h6 class="mb-0 fw-bold">Asset Registry</h6>
+                        </div>
+                        <div class="col-md-4"><input type="text" class="form-control form-control-sm"
+                                onkeyup="searchAssets(this.value)" placeholder="🔍 Search..."></div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary bg-white"
+                                    onclick="filterAsset('all')">All</button>
+                                <button class="btn btn-outline-secondary bg-white"
+                                    onclick="filterAsset('Fixed')">Fixed</button>
+                                <button class="btn btn-outline-secondary bg-white"
+                                    onclick="filterAsset('Tool')">Tool</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-hover align-middle mb-0 text-nowrap">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th style="width: 50px;">Img</th>
+                            <th>Code</th>
+                            <th>S/N</th>
+                            <th>Branch</th>
+                            <th>Name</th>
+                            <th>Holder</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Note</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ADD ASSET MODAL (Updated UI) -->
+        <div class="modal fade" id="addAssetModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+                    <div class="modal-header bg-gradient bg-primary text-white border-0 p-4">
+                        <div>
+                            <h5 class="modal-title fw-bold m-0"><i class="fas fa-plus-circle me-2"></i>ເພີ່ມຊັບສິນໃໝ່
+                                (New Asset)
+                            </h5>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 bg-light">
+                        <!-- Premium Upload UI -->
+                        <div class="text-center mb-4">
+                            <div class="upload-container">
+                                <div class="upload-box shadow-sm"
+                                    onclick="document.getElementById('newAssetImage').click()">
+                                    <img id="newAssetPreview" src="" class="d-none">
+                                    <div id="newAssetPlaceholder" class="upload-placeholder">
+                                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                        <div
+                                            style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            Upload Photo</div>
+                                    </div>
+                                </div>
+                                <div class="upload-badge"><i class="fas fa-camera"></i></div>
+                            </div>
+                            <input type="file" id="newAssetImage" class="d-none" accept="image/*"
+                                onchange="previewImage(this, 'newAssetPreview', 'newAssetPlaceholder')">
+                        </div>
+
+                        <!-- Card 1: Basic Info -->
+                        <div class="card border-0 mb-3 shadow-sm rounded-4">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold text-primary mb-3 text-uppercase small ls-1"><i
+                                        class="fas fa-info-circle me-2"></i>ຂໍ້ມູນພື້ນຖານ (Basic Info)</h6>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="small fw-bold text-muted">ລະຫັດຊັບສິນ (Asset Code) <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control fw-bold" id="newAssetCode"
+                                            value="AST-00X" required oninput="this.classList.remove('is-invalid')">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small fw-bold text-muted">ເລກຊີຣຽວ (Serial No.)</label>
+                                        <input type="text" class="form-control" id="newAssetSerial"
+                                            placeholder="ລະບຸ S/N...">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="small fw-bold text-muted">ຊື່ຊັບສິນ (Asset Name) <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control fw-bold" id="newAssetName"
+                                            placeholder="ຕົວຢ່າງ: MacBook Pro M3" required
+                                            oninput="this.classList.remove('is-invalid')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Details -->
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="card border-0 shadow-sm h-100 rounded-4">
+                                    <div class="card-body p-3">
+                                        <label class="small fw-bold text-muted">ປະເພດ (Type)</label>
+                                        <select class="form-select mb-2" id="newAssetType">
+                                            <option value="Fixed">ຊັບສິນຄົງທີ່ (Fixed Asset)</option>
+                                            <option value="Consumable">ວັດຖຸສິ້ນເປືອງ (Consumable)</option>
+                                            <option value="Tool">ເຄື່ອງມື (Tool/Equipment)</option>
+                                            <option value="Vehicle">ຍານພາຫະນະ (Vehicle)</option>
+                                        </select>
+                                        <label class="small fw-bold text-muted">ມູນຄ່າ (LAK)</label>
+                                        <input type="number" class="form-control text-end fw-bold text-success"
+                                            id="newAssetValue" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card border-0 shadow-sm h-100 rounded-4">
+                                    <div class="card-body p-3">
+                                        <label class="small fw-bold text-muted">ຜູ້ສະໜອງ (Vendor)</label>
+                                        <input type="text" class="form-control mb-2" id="newAssetVendor"
+                                            placeholder="ຊື້ຈາກຮ້ານ...">
+                                        <label class="small fw-bold text-muted">ໝວດໝູ່ (Folder)</label>
+                                        <input type="text" class="form-control" id="newAssetFolder"
+                                            placeholder="ເຊັ່ນ: IT, Office, Kitchen">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Lifecycle -->
+                        <div class="card border-0 shadow-sm mt-3 rounded-4">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold text-primary mb-3 text-uppercase small ls-1"><i
+                                        class="fas fa-calendar-alt me-2"></i>ວົງຈອນຊີວິດ & ທີ່ຢູ່ (Lifecycle)</h6>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="small fw-bold text-muted">ວັນທີຊື້ (Purchase Date)</label>
+                                        <input type="date" class="form-control small" id="newAssetPurchaseDate">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small fw-bold text-muted">ວັນໝົດປະກັນ (Warranty)</label>
+                                        <input type="date" class="form-control small" id="newAssetWarrantyDate">
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-5">
+                                        <label class="small fw-bold text-muted">ສາຂາ (Branch) <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-select" id="newAssetBranch" required
+                                            onchange="this.classList.remove('is-invalid')">
+                                            <option value="" disabled selected>ເລືອກ...</option>
+                                            <option value="HQ">HQ</option>
+                                            <option value="VTE">VTE</option>
+                                            <option value="LPB">LPB</option>
+                                            <option value="SVK">SVK</option>
+                                            <option value="PAK">PAK</option>
+                                            <option value="KHM">KHM</option>
+                                            <option value="BKO">BKO</option>
+                                            <option value="XAY">XAY</option>
+                                            <option value="XIENG">XIENG</option>
+                                            <option value="OTHER">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-7">
+                                        <label class="small fw-bold text-muted">ຜູ້ຖືຄອງ (Holder)</label>
+                                        <input type="text" class="form-control" id="newAssetHolder"
+                                            placeholder="ຊື່ຜູ້ຮັບຜິດຊອບ...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3">
+                        <button class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary px-4 fw-bold rounded-pill" onclick="saveNewAsset()">Save
+                            Asset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT ASSET MODAL -->
+        <div class="modal fade" id="editAssetModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+                    <div class="modal-header bg-warning text-dark border-0 p-4">
+                        <div>
+                            <h5 class="modal-title fw-bold m-0"><i class="fas fa-wrench me-2"></i>Edit Asset</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 bg-light">
+                        <input type="hidden" id="editAssetCodeHidden">
+
+                        <!-- Upload -->
+                        <div class="text-center mb-4">
+                            <div class="upload-container">
+                                <div class="upload-box shadow-sm"
+                                    onclick="document.getElementById('editAssetImage').click()">
+                                    <img id="editAssetPreview" src="" class="d-none">
+                                    <div id="editAssetPlaceholder" class="upload-placeholder">
+                                        <i class="fas fa-camera upload-icon"></i>
+                                        <div style="font-size: 0.70rem; fw-bold">CHANGE</div>
+                                    </div>
+                                </div>
+                                <div class="upload-badge bg-warning text-dark border-dark"><i
+                                        class="fas fa-pencil-alt"></i></div>
+                            </div>
+                            <input type="file" id="editAssetImage" class="d-none" accept="image/*"
+                                onchange="previewImage(this, 'editAssetPreview', 'editAssetPlaceholder')">
+                        </div>
+
+                        <!-- Card 1: Details -->
+                        <div class="card border-0 mb-3 shadow-sm rounded-4">
+                            <div class="card-body p-3">
+                                <label class="small fw-bold text-muted">ຊື່ຊັບສິນ (Asset Name)</label>
+                                <input type="text" class="form-control fw-bold mb-3" id="editAssetName">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6"><label class="small text-muted fw-bold">ເລກຊີຣຽວ
+                                            (S/N)</label><input type="text" class="form-control" id="editAssetSerial">
+                                    </div>
+                                    <div class="col-6"><label class="small text-muted fw-bold">ຜູ້ສະໜອງ
+                                            (Vendor)</label><input type="text" class="form-control"
+                                            id="editAssetVendor"></div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6"><label class="small text-muted fw-bold">ໝວດໝູ່
+                                            (Folder)</label><input type="text" class="form-control"
+                                            id="editAssetFolder"></div>
+                                    <div class="col-6"><label class="small text-muted fw-bold">ຜູ້ຖືຄອງ
+                                            (Holder)</label><input type="text" class="form-control"
+                                            id="editAssetHolder"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Dates -->
+                        <div class="card border-0 mb-3 shadow-sm rounded-4">
+                            <div class="card-body p-3">
+                                <div class="row g-2">
+                                    <div class="col-6"><label class="small text-muted fw-bold">ວັນທີຊື້
+                                            (Purchase)</label><input type="date" class="form-control small"
+                                            id="editAssetPurchaseDate"></div>
+                                    <div class="col-6"><label class="small text-muted fw-bold">ວັນໝົດປະກັນ
+                                            (Warranty)</label><input type="date" class="form-control small"
+                                            id="editAssetWarrantyDate"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Status -->
+                        <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-warning">
+                            <div class="card-body p-3">
+                                <label class="small fw-bold text-muted">ສະຖານະ (Status)</label>
+                                <select class="form-select mb-2" id="editAssetStatus" onchange="toggleRepairNote()">
+                                    <option value="Active">ພ້ອມໃຊ້ງານ (Active)</option>
+                                    <option value="Repair">ສົ່ງຊ້ອມ (Repair)</option>
+                                    <option value="In Use">ກຳລັງໃຊ້ງານ (In Use)</option>
+                                </select>
+                                <div class="collapse" id="repairNoteDiv">
+                                    <textarea class="form-control border-danger bg-danger bg-opacity-10"
+                                        id="editAssetNote" rows="2"
+                                        placeholder="ລະບຸອາການເສຍ/ລາຍລະອຽດການຊ້ອມ..."></textarea>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="small fw-bold text-muted">ສາຂາ (Branch)</label>
+                                    <select class="form-select" id="editAssetBranch">
+                                        <option value="HQ">HQ</option>
+                                        <option value="VTE">VTE</option>
+                                        <option value="LPB">LPB</option>
+                                        <option value="SVK">SVK</option>
+                                        <option value="PAK">PAK</option>
+                                        <option value="KHM">KHM</option>
+                                        <option value="BKO">BKO</option>
+                                        <option value="XAY">XAY</option>
+                                        <option value="XIENG">XIENG</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3">
+                        <button class="btn btn-light fw-bold" data-bs-dismiss="modal">ຍົກເລີກ (Cancel)</button>
+                        <button class="btn btn-warning px-4 fw-bold rounded-pill" onclick="saveEditAsset()">ປັບປຸງ
+                            (Update)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- APP STATE ---
+        let currentUser = { name: null, role: null };
+        let assetData = [];
+        let assetFiltered = [];
+        let cart = [];
+        const promoData = [
+            { code: "P1", shortname: "Notebook Asus", cost: 13200, icon: "fa-laptop" },
+            { code: "P2", shortname: "Canon Printer", cost: 4500, icon: "fa-print" }
+        ];
+        let posFiltered = promoData;
+        let userData = [{ id: 1, u: 'admin', p: 'admin', name: 'Super Admin', role: 'admin' }];
+
+        // --- IMAGE HELPER ---
+        function previewImage(input, imgId, phId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById(imgId);
+                    const ph = document.getElementById(phId);
+                    img.src = e.target.result;
+                    img.classList.remove('d-none');
+                    if (ph) ph.classList.add('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const w = (img.width > MAX_WIDTH) ? MAX_WIDTH : img.width;
+                    const h = (img.width > MAX_WIDTH) ? (img.height * scaleSize) : img.height;
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.6));
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPosGrid();
+            if (typeof google === 'undefined') loadFromLocalBackup();
+        });
+
+        // --- CORE FUNCTIONS ---
+        function showLoading() { document.getElementById('globalLoading').classList.remove('d-none'); }
+        function hideLoading() { document.getElementById('globalLoading').classList.add('d-none'); }
+
+        // --- ACTIVITY LOGGING (New Module) ---
+        function logDbActivity(module, action, details, val = 0) {
+            if (typeof google === 'undefined' || !google.script) return; // Offline mode ignore
+
+            // Fire and forget - don't wait for success
+            google.script.run.recordActivity({
+                module: module,
+                user: currentUser ? currentUser.name : 'Guest',
+                action: action,
+                details: details,
+                refCode: '-',
+                value: val
+            });
+        }
+
+        function attemptLogin() {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('loginError');
+            const card = document.getElementById('loginCard');
+
+            // Reset UI
+            err.style.display = 'none';
+            card.classList.remove('shake');
+
+            if (!u || !p) {
+                err.innerText = '⚠️ Please enter username and password';
+                err.style.display = 'block';
+                void card.offsetWidth; // Trigger reflow
+                card.classList.add('shake');
+                return;
+            }
+
+            const user = userData.find(x => x.u === u && x.p === p);
+
+            if (user) {
+                currentUser = user;
+                document.getElementById('userDisplay').innerText = user.name;
+                document.getElementById('roleDisplay').innerText = user.role.toUpperCase();
+
+                // Track Login
+                try { logDbActivity('AUTH', 'LOGIN', `User ${user.u} logged in successfully`, 0); } catch (e) { }
+
+                // Smooth Transition
+                const overlay = document.getElementById('loginOverlay');
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+
+                // Scale effect on card for extra smoothness
+                card.style.transform = 'scale(1.1)';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    loginSuccess();
+                }, 600);
+            } else {
+                err.innerText = '❌ Incorrect Username or Password';
+                err.style.display = 'block';
+                void card.offsetWidth; // Trigger reflow
+                card.classList.add('shake');
+            }
+        }
+
+        function loginSuccess() {
+            showLoading();
+            if (typeof google !== 'undefined' && google.script) {
+                google.script.run.withSuccessHandler(d => {
+                    hideLoading(); assetData = d ? (typeof d === 'string' ? JSON.parse(d) : d) : []; assetFiltered = assetData; renderAssets(); saveToLocalBackup();
+                }).withFailureHandler(() => { hideLoading(); loadFromLocalBackup(); }).getAssets();
+            } else { hideLoading(); loadFromLocalBackup(); }
+        }
+
+        function logout() {
+            logDbActivity('AUTH', 'LOGOUT', `User ${currentUser.name} logged out`);
+            location.reload();
+        }
+
+        function nav(id, el) {
+            document.querySelectorAll('.section-pane').forEach(d => d.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (el) { document.querySelectorAll('.nav-item').forEach(d => d.classList.remove('active')); el.classList.add('active'); }
+        }
+
+        // --- POS ---
+        function filterPos(t) { posFiltered = promoData.filter(i => i.shortname.toLowerCase().includes(t.toLowerCase())); renderPosGrid(); }
+        function renderPosGrid() { document.getElementById('posGrid').innerHTML = posFiltered.map(i => `<div class="col-4"><div class="card product-card p-3 text-center h-100" onclick="addToCart('${i.code}')"><i class="fas ${i.icon} fa-2x mb-2 text-secondary"></i><h6 class="fw-bold mb-0 small">${i.shortname}</h6></div></div>`).join(''); }
+        function addToCart(c) { const x = cart.find(i => i.code === c); if (x) x.qty++; else cart.push({ ...promoData.find(i => i.code === c), qty: 1 }); renderCart(); }
+        function renderCart() {
+            document.getElementById('cartItems').innerHTML = cart.map(i => `<div class="d-flex justify-content-between border-bottom p-2 small"><div>${i.shortname} x${i.qty}</div><div class="fw-bold">${(i.cost * i.qty).toLocaleString()}</div></div>`).join('');
+            document.getElementById('cartTotal').innerText = cart.reduce((s, i) => s + (i.cost * i.qty), 0).toLocaleString();
+        }
+        function checkout() {
+            if (cart.length) {
+                const total = cart.reduce((s, i) => s + (i.cost * i.qty), 0);
+
+                // Track Sale
+                logDbActivity('POS', 'SALE', `Sold ${cart.length} items. Ref: ${new Date().getTime()}`, total);
+
+                alert('✅ Paid: ' + total.toLocaleString());
+                cart = [];
+                renderCart();
+            }
+        }
+
+        // --- ASSETS ---
+        function renderAssets() {
+            document.getElementById('assetTotalVal').innerText = '฿' + assetData.reduce((s, a) => s + (parseFloat(a.value) || 0), 0).toLocaleString();
+            document.getElementById('assetActiveCount').innerText = assetData.filter(a => ['Active', 'In Use'].includes(a.status)).length;
+            document.getElementById('assetRepairCount').innerText = assetData.filter(a => a.status === 'Repair').length;
+            if (document.getElementById('dashAssetCount')) document.getElementById('dashAssetCount').innerText = assetData.length + ' Items';
+
+            document.getElementById('assetTable').innerHTML = assetFiltered.map(a => `
+                <tr>
+                    <td><img src="${a.image || 'https://via.placeholder.com/50'}" class="rounded border bg-white" style="width: 40px; height: 40px; object-fit: cover; cursor: zoom-in;" onclick="window.open(this.src)"></td>
+                    <td><span class="fw-bold text-primary small">${a.code}</span></td>
+                    <td><span class="small text-muted">${a.serial || '-'}</span></td>
+                    <td><span class="badge bg-white text-dark border">${a.branch}</span></td>
+                    <td>${a.name}</td>
+                    <td>${a.holder}</td>
+                    <td>${(a.value || 0).toLocaleString()}</td>
+                    <td><span class="badge ${a.status === 'Repair' ? 'bg-danger' : 'bg-success'}">${a.status}</span></td>
+                    <td class="small text-muted text-truncate" style="max-width: 150px;">${a.note}</td>
+                    <td>
+                        <button class="btn btn-sm btn-light border" onclick="openEditModal('${a.code}')"><i class="fas fa-wrench text-warning"></i></button>
+                        ${currentUser.role === 'admin' ? `<button class="btn btn-sm btn-light border ms-1" onclick="deleteAsset('${a.code}')"><i class="fas fa-trash text-danger"></i></button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterAsset(t) { assetFiltered = t === 'all' ? assetData : assetData.filter(a => a.type === t); renderAssets(); }
+        function searchAssets(q) { assetFiltered = assetData.filter(a => Object.values(a).some(v => String(v).toLowerCase().includes(q.toLowerCase()))); renderAssets(); }
+
+        function saveNewAsset() {
+            // Get Elements
+            const elCode = document.getElementById('newAssetCode');
+            const elName = document.getElementById('newAssetName');
+            const elBranch = document.getElementById('newAssetBranch');
+            const elType = document.getElementById('newAssetType');
+            const elVal = document.getElementById('newAssetValue');
+            const elVendor = document.getElementById('newAssetVendor');
+            const elSerial = document.getElementById('newAssetSerial');
+
+            // Reset Logic
+            [elCode, elName, elBranch, elType, elVal, elVendor, elSerial].forEach(el => el.classList.remove('is-invalid'));
+            let hasError = false;
+
+            // Strict Validation ("ຈງົກອກໃຫຄ້ບ" - Fill Complete)
+            if (!elCode.value) { elCode.classList.add('is-invalid'); hasError = true; }
+            if (!elName.value) { elName.classList.add('is-invalid'); hasError = true; }
+            if (!elBranch.value) { elBranch.classList.add('is-invalid'); hasError = true; }
+            if (!elType.value) { elType.classList.add('is-invalid'); hasError = true; }
+            if (!elVal.value || elVal.value == 0) { elVal.classList.add('is-invalid'); hasError = true; }
+            // Optional but requested "Complete":
+            // if (!elVendor.value) { elVendor.classList.add('is-invalid'); hasError = true; }
+            // if (!elSerial.value) { elSerial.classList.add('is-invalid'); hasError = true; }
+
+            if (hasError) {
+                return alert('⚠️ ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບຖ້ວນ (Please fill in all information completely)!');
+            }
+
+            const file = document.getElementById('newAssetImage').files[0];
+            const save = (img) => {
+                const item = {
+                    code: elCode.value,
+                    name: elName.value,
+                    branch: elBranch.value,
+                    folder: document.getElementById('newAssetFolder').value || 'Uncategorized',
+                    type: elType.value,
+                    value: parseFloat(elVal.value) || 0,
+                    holder: document.getElementById('newAssetHolder').value || '-',
+                    serial: elSerial.value || '-',
+                    vendor: elVendor.value || '-',
+                    purchaseDate: document.getElementById('newAssetPurchaseDate').value || '',
+                    warrantyDate: document.getElementById('newAssetWarrantyDate').value || '',
+                    status: 'Active',
+                    note: '-',
+                    image: img
+                };
+
+                assetData.push(item);
+                assetFiltered = assetData;
+                renderAssets();
+
+                // Close Modal
+                bootstrap.Modal.getInstance(document.getElementById('addAssetModal')).hide();
+
+                // Sync to Backend
+                if (typeof google !== 'undefined' && google.script) {
+                    google.script.run.withSuccessHandler(() => {
+                        // Success Feedback
+                        alert('✅ ບັນທຶກສຳເລັດ (Saved Successfully)!');
+                    }).saveAsset(item);
+                } else {
+                    saveToLocalBackup();
+                    alert('⚠️ Offline Mode: Saved locally.');
+                }
+            };
+            if (file) compressImage(file, save); else save('');
+        }
+
+        function openEditModal(c) {
+            const i = assetData.find(a => a.code === c);
+            if (!i) return;
+            document.getElementById('editAssetCodeHidden').value = c;
+            document.getElementById('editAssetName').value = i.name;
+            document.getElementById('editAssetFolder').value = i.folder;
+            document.getElementById('editAssetHolder').value = i.holder;
+            document.getElementById('editAssetBranch').value = i.branch;
+            document.getElementById('editAssetStatus').value = i.status;
+            document.getElementById('editAssetNote').value = i.note;
+
+            const img = document.getElementById('editAssetPreview');
+            const ph = document.getElementById('editAssetPlaceholder');
+            if (i.image) { img.src = i.image; img.classList.remove('d-none'); ph.classList.add('d-none'); }
+            else { img.classList.add('d-none'); ph.classList.remove('d-none'); }
+
+            toggleRepairNote();
+            new bootstrap.Modal(document.getElementById('editAssetModal')).show();
+        }
+
+        function toggleRepairNote() { document.getElementById('repairNoteDiv').classList.toggle('show', document.getElementById('editAssetStatus').value === 'Repair'); }
+
+        function saveEditAsset() {
+            const c = document.getElementById('editAssetCodeHidden').value;
+            const i = assetData.find(a => a.code === c);
+            if (i) {
+                i.name = document.getElementById('editAssetName').value;
+                i.branch = document.getElementById('editAssetBranch').value;
+                i.folder = document.getElementById('editAssetFolder').value;
+                i.holder = document.getElementById('editAssetHolder').value;
+                i.status = document.getElementById('editAssetStatus').value;
+                i.note = i.status === 'Repair' ? document.getElementById('editAssetNote').value : '-';
+
+                const file = document.getElementById('editAssetImage').files[0];
+                const update = (img) => {
+                    if (img) i.image = img;
+                    renderAssets();
+                    bootstrap.Modal.getInstance(document.getElementById('editAssetModal')).hide();
+                    if (typeof google !== 'undefined' && google.script) google.script.run.updateAsset(i); else saveToLocalBackup();
+                };
+                if (file) compressImage(file, update); else update(null);
+            }
+        }
+
+        function deleteAsset(c) {
+            if (confirm('Delete ' + c + '?')) {
+                assetData = assetData.filter(a => a.code !== c); assetFiltered = assetData; renderAssets();
+                if (typeof google !== 'undefined' && google.script) google.script.run.deleteAsset(c); else saveToLocalBackup();
+            }
+        }
+
+        function printReport() { window.print(); }
+        function saveToLocalBackup() { localStorage.setItem('bn_backup_v2', JSON.stringify(assetData)); }
+        function loadFromLocalBackup() { const d = localStorage.getItem('bn_backup_v2'); if (d) assetData = JSON.parse(d); assetFiltered = assetData; renderAssets(); }
+        function simulateQrAudit() { const c = prompt("Scan QR:"); if (c) alert(assetData.find(a => a.code === c) ? '✅ Found' : '❌ Not Found'); }
+
+    </script>
+</body>
+
+</html>
